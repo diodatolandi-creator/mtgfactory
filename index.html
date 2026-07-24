@@ -3,66 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MTG P2P Simulator</title>
-    <!-- Foglio di stile separato -->
+    <title>MTG Test Factory</title>
+    <!-- Libreria PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="css/styles.css">
-    <!-- PeerJS per la connessione P2P -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body>
 
-    <!-- Header e Controlli Principali -->
-    <header>
-        <div class="controls-group">
-            <h2>MTG Simulator</h2>
-            <span id="connection-status" class="status-badge status-offline">Offline</span>
+    <h1 id="mainTitle">MTG Test Factory</h1>
+    <div id="contextMenu"></div>
+
+    <!-- MODALE ZONE -->
+    <div id="zoneModal" class="modal-overlay hidden">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="zoneModalTitle" style="margin:0; color:#f39c12;">Titolo Zona</h3>
+                <button id="modalCloseBtn">Chiudi</button>
+            </div>
+            <div id="zoneModalBody" class="zone" style="max-height: 60vh; overflow-y: auto;"></div>
         </div>
-        <div class="controls-group">
-            <button id="btn-load-deck">Carica Deck</button>
-            <button id="btn-connect-p2p">Host / Connetti P2P</button>
-            <button id="btn-reset" class="btn-danger">Reset Partita</button>
+    </div>
+
+    <!-- MODALITÀ DI GIOCO -->
+    <div id="modeSelectScreen" class="setup-container">
+        <h3 id="txtChooseMode">Scegli la Modalità di Gioco</h3>
+        <div class="mode-select">
+            <button id="btnModeLocal">Gioca in Locale (vs IA)</button>
+            <button id="btnModeOnline" class="secondary">Gioca in Rete (P2P Umano)</button>
         </div>
-    </header>
+    </div>
 
-    <!-- Layout di Gioco Principale -->
-    <div id="game-container">
+    <!-- SETUP ONLINE -->
+    <div id="onlineSetupScreen" class="setup-container hidden">
+        <div class="lang-selector">
+            <label class="lang-option"><span>🇮🇹 ITA</span><input type="radio" name="lang_online" value="it" checked></label>
+            <label class="lang-option"><span>🇬🇧 ENG</span><input type="radio" name="lang_online" value="en"></label>
+        </div>
+        <h3 id="txtOnlineLobby">Lobby Online (P2P)</h3>
+        <div id="connectionStatus" style="color: #f39c12; font-weight: bold;">Connessione al server di rete in corso...</div>
 
-        <!-- Campo da Gioco (Playfield) -->
-        <main id="playfield">
-            <!-- Zona Avversario -->
-            <section id="opponent-battlefield" class="field-zone">
-                <div class="zone-title">Campo Avversario</div>
-            </section>
+        <div id="peerInfoBox" style="display:none; width: 100%; background: #222; padding: 15px; border-radius: 6px; text-align: center;">
+            <p><span id="txtRoomIdLabel">Il tuo ID Stanza</span>: <strong id="myPeerId" style="color: #3498db; user-select: text;">Generazione...</strong></p>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <input type="text" id="targetPeerIdInput" placeholder="Inserisci ID Stanza Avversario" style="flex:1; margin-bottom:0;">
+                <button id="txtJoinBtn" class="secondary">Unisciti alla Stanza</button>
+            </div>
+        </div>
 
-            <!-- Tua Zona di Gioco -->
-            <section id="my-battlefield" class="field-zone">
-                <div class="zone-title">Mio Campo</div>
-            </section>
+        <div id="onlineDeckSection" style="display:none; width: 100%;">
+            <hr style="border-color: #333; margin: 15px 0;">
+            <div class="deck-box-input" style="width: 100%;">
+                <label id="txtOnlineNameLabel" style="font-weight: bold; color: #3498db;">Il Tuo Nome Giocatore</label>
+                <input type="text" id="onlinePlayerNameInput" value="Giocatore Online">
+                <textarea id="onlineDeckInput">3 Grizzly Bears\n2 Trained Orgg\n9 Mountain\n7 Forest</textarea>
+                <textarea id="onlineSideboardInput" class="sideboard-input">2 Naturalize</textarea>
+            </div>
+            <button id="txtStartOnlineBtn" style="width: 100%; margin-top: 15px;">Pronto! Avvia Partita Online</button>
+        </div>
+    </div>
 
-            <!-- La tua Mano -->
-            <section id="my-hand" class="field-zone">
-                <div class="zone-title">Mano</div>
-            </section>
-        </main>
+    <!-- SETUP LOCALE -->
+    <div id="setupScreen" class="setup-container hidden">
+        <div class="lang-selector">
+            <label class="lang-option"><span>🇮🇹 ITA</span><input type="radio" name="lang_local" value="it" checked></label>
+            <label class="lang-option"><span>🇬🇧 ENG</span><input type="radio" name="lang_local" value="en"></label>
+        </div>
+        <h3 id="txtLocalSetupTitle">Configurazione Mazzi e Sideboard (Locale)</h3>
+        <div class="decks-row">
+            <div class="deck-box-input">
+                <label style="font-weight: bold; color: #3498db;">Nome Giocatore 1</label>
+                <input type="text" id="player1NameInput" value="Giocatore">
+<textarea id="playerDeckInput">3 Grizzly Bears
+2 Trained Orgg
+2 Goblin Raider
+1 Llanowar Elves
+1 Hill Giant
+1 Ogre Taskmaster
+1 Spined Wurm
+2 Lava Axe
+2 Volcanic Hammer
+1 Monstrous Growth
+1 Rampant Growth
+1 Fog
+1 Orcish Oriflamme
+1 Rod of Ruin
+9 Mountain
+7 Forest</textarea>
+<textarea id="playerSideboardInput" class="sideboard-input">2 Naturalize
+2 Giant Growth</textarea>
+            </div>
+            <div class="deck-box-input">
+                <label style="font-weight: bold; color: #e74c3c;">Nome Giocatore 2 / IA</label>
+                <input type="text" id="player2NameInput" value="IA">
+<textarea id="aiDeckInput">2 Vizzerdrix
+2 Giant Octopus
+2 Coral Merfolk
+2 Knight Errant
+1 Eager Cadet
+1 Merfolk of the Pearl Trident
+2 Sacred Nectar
+2 Vengeance
+1 Breath of Life
+1 Disenchant
+1 Sleight of Hand
+1 Holy Strength
+1 Honor Guard
+1 Patagia Golem
+8 Island
+8 Plains</textarea>
+<textarea id="aiSideboardInput" class="sideboard-input">2 Disenchant
+2 Unsummon</textarea>
+            </div>
+        </div>
+        <button id="txtStartLocalBtn">Avvia Partita</button>
+    </div>
 
-        <!-- Sidebar per Log, Mana Pool e Contatori -->
-        <aside id="sidebar">
-            <div class="sidebar-section">
-                <h3>Contatori & Mana</h3>
-                <div id="stats-panel">
-                    <!-- I contatori di vita e mana verranno inseriti via JS -->
+    <!-- TABELLONE DI GIOCO -->
+    <div id="gameLayout" class="game-layout hidden">
+
+        <!-- SIDEBAR SINISTRA: FASI + PILA SOTTO -->
+        <div class="sidebar-left-column">
+            <div class="sidebar" id="sidebarContainer">
+                <div class="sidebar-title" id="sidebarTitle">Fasi Turno</div>
+                <div id="p_untap" class="phase-box">1. STAP</div>
+                <div id="p_upkeep" class="phase-box">2. MANTENIMENTO</div>
+                <div id="p_draw" class="phase-box">3. ACQUISIZIONE</div>
+                <div id="p_main1" class="phase-box">4. PRINCIPALE 1</div>
+                <div id="p_combat" class="phase-box">5. COMBATTIMENTO</div>
+                <div id="p_main2" class="phase-box">6. PRINCIPALE 2</div>
+                <div id="p_end" class="phase-box">7. FINE / END STEP</div>
+            </div>
+
+            <!-- PILA SOTTO LE FASI -->
+            <div class="stack-sidebar-box">
+                <div class="zone-title-small">⚡ Pila</div>
+                <div class="card-zone-shape" id="stackZone">
+                    <span id="stackCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAMPO CENTRALE -->
+        <div class="center-board">
+
+            <!-- SEZIONE AVVERSARIO (IA) -->
+            <div class="player-section">
+                <!-- HUD Avversario con Contatori Dedicati -->
+                <div class="player-hud">
+                    <div class="life-counter">
+                        <span>❤️ Vita:</span>
+                        <button onclick="modificaVitaOpp(-1)">-</button>
+                        <span id="oppLife">20</span>
+                        <button onclick="modificaVitaOpp(1)">+</button>
+                    </div>
+                    <div class="mana-pool">
+                        <span style="color:#f39c12; font-weight:bold;">Mana:</span>
+                        <div class="mana-item mana-w">W <button onclick="modificaManaOpp('W',-1)">-</button><span id="oppManaW">0</span><button onclick="modificaManaOpp('W',1)">+</button></div>
+                        <div class="mana-item mana-u">U <button onclick="modificaManaOpp('U',-1)">-</button><span id="oppManaU">0</span><button onclick="modificaManaOpp('oppManaU',1)">+</button></div>
+                        <div class="mana-item mana-b">B <button onclick="modificaManaOpp('B',-1)">-</button><span id="oppManaB">0</span><button onclick="modificaManaOpp('oppManaB',1)">+</button></div>
+                        <div class="mana-item mana-r">R <button onclick="modificaManaOpp('R',-1)">-</button><span id="oppManaR">0</span><button onclick="modificaManaOpp('oppManaR',1)">+</button></div>
+                        <div class="mana-item mana-g">G <button onclick="modificaManaOpp('G',-1)">-</button><span id="oppManaG">0</span><button onclick="modificaManaOpp('oppManaG',1)">+</button></div>
+                        <div class="mana-item mana-c">C <button onclick="modificaManaOpp('C',-1)">-</button><span id="oppManaC">0</span><button onclick="modificaManaOpp('C',1)">+</button></div>
+                    </div>
+                </div>
+
+                <!-- MANA + MANO COPERTA + ZONE SERVIZIO AVVERSARIO -->
+                <div class="opp-hand-container">
+                    <div class="zone-label-mini" style="font-weight: bold; color: #e74c3c;">Mano Avversario</div>
+                    <div class="opp-hand-cards" id="oppHand"></div>
+
+                    <!-- Zone di Servizio Avversario (Mazzo, Cimitero, Esilio) -->
+                    <div class="right-service-zones" style="margin: 0; padding: 6px;">
+                        <div class="service-zone-item" title="Mazzo Avversario">
+                            <div class="zone-label-mini">Mazzo</div>
+                            <div class="card-zone-shape deck-card-back" id="oppDeckZone">
+                                <span id="oppDeckCount">0</span>
+                            </div>
+                        </div>
+                        <div class="service-zone-item" title="Cimitero Avversario">
+                            <div class="zone-label-mini">Cimitero</div>
+                            <div class="card-zone-shape graveyard-shape" id="oppGraveyardZone">
+                                <span id="oppGraveyardCount">0</span>
+                            </div>
+                        </div>
+                        <div class="service-zone-item" title="Esilio Avversario">
+                            <div class="zone-label-mini">Esilio</div>
+                            <div class="card-zone-shape exile-shape" id="oppExileZone">
+                                <span id="oppExileCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="zone-title"><span id="oppSectionTitle">Avversario (IA)</span></div>
+                <div class="section-content">
+                    <div class="zone-main">
+                        <div id="aiBattlefieldLand" class="zone battlefield-row"></div>
+                        <div id="aiBattlefieldNonLand" class="zone battlefield-row"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Console di Log e Chat -->
-            <div id="log-container">
-                <div class="log-entry">[Sistema] Simulatore pronto.</div>
-            </div>
-        </aside>
+            <!-- SEZIONE GIOCATORE -->
+            <div class="player-section">
+                <!-- HUD Giocatore con Contatori Dedicati e Colori Mana -->
+                <div class="player-hud">
+                    <div class="life-counter">
+                        <span>❤️ Vita:</span>
+                        <button onclick="modificaVita(-1)">-</button>
+                        <span id="playerLife">20</span>
+                        <button onclick="modificaVita(1)">+</button>
+                    </div>
+                    <div class="mana-pool">
+                        <span style="color:#f39c12; font-weight:bold;">Mana:</span>
+                        <div class="mana-item mana-w">W <button onclick="modificaMana('W', -1)">-</button><span id="manaW">0</span><button onclick="modificaMana('W', 1)">+</button></div>
+                        <div class="mana-item mana-u">U <button onclick="modificaMana('U', -1)">-</button><span id="manaU">0</span><button onclick="modificaMana('U', 1)">+</button></div>
+                        <div class="mana-item mana-b">B <button onclick="modificaMana('B', -1)">-</button><span id="manaB">0</span><button onclick="modificaMana('B', 1)">+</button></div>
+                        <div class="mana-item mana-r">R <button onclick="modificaMana('R', -1)">-</button><span id="manaR">0</span><button onclick="modificaMana('R', 1)">+</button></div>
+                        <div class="mana-item mana-g">G <button onclick="modificaMana('G', -1)">-</button><span id="manaG">0</span><button onclick="modificaMana('G', 1)">+</button></div>
+                        <div class="mana-item mana-c">C <button onclick="modificaMana('C', -1)">-</button><span id="manaC">0</span><button onclick="modificaMana('C', 1)">+</button></div>
+                    </div>
+                </div>
 
+                <div class="zone-title"><span id="txtMyBattlefieldLabel">Il tuo Campo di Battaglia</span></div>
+                <div class="section-content">
+                    <div class="zone-main">
+                        <div id="playerBattlefieldNonLand" class="zone battlefield-row"></div>
+                        <div id="playerBattlefieldLand" class="zone battlefield-row"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MANA + ZONE SERVIZIO A DESTRA DELLA MANO -->
+            <div class="player-hand-wrapper">
+                <div class="player-hand-container">
+                    <div class="zone-title">La tua Mano</div>
+                    <div class="hand-cards-flex" id="playerHand"></div>
+                </div>
+
+                <!-- ZONE DI SERVIZIO (Mazzo, Cimitero, Esilio) A DESTRA DELLA MANO -->
+                <div class="right-service-zones-wrapper" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Tasto Cambia Fase / Passa Turno -->
+                    <button id="actionButton" class="phase-action-btn">Passa Fase</button>
+
+                    <div class="right-service-zones">
+                        <div class="service-zone-item" title="Mazzo">
+                            <div class="zone-label-mini">Mazzo</div>
+                            <div class="card-zone-shape deck-card-back" id="deckZone">
+                                <span id="deckCount">0</span>
+                            </div>
+                        </div>
+                        <div class="service-zone-item" title="Cimitero">
+                            <div class="zone-label-mini">Cimitero</div>
+                            <div class="card-zone-shape graveyard-shape" id="graveyardZone">
+                                <span id="graveyardCount">0</span>
+                            </div>
+                        </div>
+                        <div class="service-zone-item" title="Esilio">
+                            <div class="zone-label-mini">Esilio</div>
+                            <div class="card-zone-shape exile-shape" id="exileZone">
+                                <span id="exileCount">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONSOLE DESTRA -->
+        <div class="console-sidebar">
+            <div class="sidebar-title" id="chatTitle">Console & Chat IA</div>
+            <div id="logBox" class="log-box"></div>
+        </div>
     </div>
 
-    <!-- Script Principale (modulo) -->
+    <!-- AZIONI IN BASSO A DESTRA -->
+    <div id="bottomActionsContainer" class="bottom-actions-container">
+        <button id="newGameBtn" class="new-game-btn">Nuova Partita</button>
+        <button id="exitGameBtn" class="exit-game-btn">Esci</button>
+    </div>
+
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
