@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG P2P Simulator</title>
+    <!-- Foglio di stile separato -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- PeerJS per la connessione P2P -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+
+    <!-- Header e Controlli Principali -->
+    <header>
+        <div class="controls-group">
+            <h2>MTG Simulator</h2>
+            <span id="connection-status" class="status-badge status-offline">Offline</span>
+        </div>
+        <div class="controls-group">
+            <button id="btn-load-deck">Carica Deck</button>
+            <button id="btn-connect-p2p">Host / Connetti P2P</button>
+            <button id="btn-reset" class="btn-danger">Reset Partita</button>
+        </div>
+    </header>
+
+    <!-- Layout di Gioco Principale -->
+    <div id="game-container">
+
+        <!-- Campo da Gioco (Playfield) -->
+        <main id="playfield">
+            <!-- Zona Avversario -->
+            <section id="opponent-battlefield" class="field-zone">
+                <div class="zone-title">Campo Avversario</div>
+            </section>
+
+            <!-- Tua Zona di Gioco -->
+            <section id="my-battlefield" class="field-zone">
+                <div class="zone-title">Mio Campo</div>
+            </section>
+
+            <!-- La tua Mano -->
+            <section id="my-hand" class="field-zone">
+                <div class="zone-title">Mano</div>
+            </section>
+        </main>
+
+        <!-- Sidebar per Log, Mana Pool e Contatori -->
+        <aside id="sidebar">
+            <div class="sidebar-section">
+                <h3>Contatori & Mana</h3>
+                <div id="stats-panel">
+                    <!-- I contatori di vita e mana verranno inseriti via JS -->
+                </div>
+            </div>
+
+            <!-- Console di Log e Chat -->
+            <div id="log-container">
+                <div class="log-entry">[Sistema] Simulatore pronto.</div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Script Principale (modulo) -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

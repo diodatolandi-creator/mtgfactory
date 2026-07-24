@@ -1,0 +1,10 @@
+/
+├── index.html            <- Layout HTML pulito
+├── css/
+│   └── styles.css        <- Tutti gli stili della plancia e delle carte
+└── js/
+    ├── api.js            <- Chiamate ad API esterne (Scryfall)
+    ├── p2p.js            <- Gestione socket WebRTC / PeerJS
+    ├── game-logic.js     <- Regole, contatori, stato di gioco
+    ├── ui.js             <- Rendering grafico e log della console
+    └── main.js           <- Orchestratore principale e event binding
