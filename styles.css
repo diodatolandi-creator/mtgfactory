@@ -1,0 +1,639 @@
+/* ==========================================
+ *  1. RESET & STILI BASE
+ *  ========================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+}
+
+h1 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #f39c12;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==========================================
+ *  2. SETUP, MODALI & OVERLAYS
+ *  ========================================== */
+.setup-container {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 25px;
+    max-width: 750px;
+    width: 100%;
+    margin: 20px auto;
+    color: #e0e0e0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+.setup-container h3 {
+    margin-bottom: 15px;
+    color: #f39c12;
+}
+
+.mode-select {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.setup-container button, .mode-select button {
+    padding: 12px 20px;
+    background-color: #f39c12;
+    color: #121212;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.setup-container button:hover, .mode-select button:hover {
+    background-color: #d68910;
+}
+
+.mode-select button.secondary {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.mode-select button.secondary:hover {
+    background-color: #2980b9;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    background: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    font-family: monospace;
+}
+
+textarea {
+    resize: vertical;
+    height: 120px;
+}
+
+.decks-row {
+    display: flex;
+    gap: 20px;
+    text-align: left;
+}
+
+.deck-box-input {
+    flex: 1;
+}
+
+.card-count-label {
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+/* Modali */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.modal-card {
+    background: #1e1e1e;
+    border: 2px solid #f39c12;
+    border-radius: 12px;
+    padding: 25px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    color: #e0e0e0;
+}
+
+.mulligan-card {
+    max-width: 850px;
+    text-align: center;
+}
+
+.hand-display {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    min-height: 160px;
+}
+
+/* Zoom Anteprima Carta */
+.card-zoom-preview {
+    position: fixed;
+    z-index: 100000;
+    pointer-events: none;
+    width: 220px;
+    height: 308px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.9);
+    border: 2px solid #f39c12;
+    overflow: hidden;
+    background: #000;
+}
+
+.card-zoom-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ==========================================
+ *  3. LAYOUT DI GIOCO PRINCIPALE
+ *  ========================================== */
+.game-layout {
+    display: flex;
+    width: 100%;
+    max-width: 1400px;
+    height: 90vh;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.sidebar-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 180px;
+}
+
+.sidebar {
+    width: 100%;
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-title {
+    font-weight: bold;
+    color: #f39c12;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.phase-box {
+    background: #252525;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    border-left: 3px solid #555;
+}
+
+.stack-sidebar-box {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 10px;
+    text-align: center;
+}
+
+.zone-title-small {
+    font-size: 12px;
+    color: #f39c12;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.center-board {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-section {
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.zone-title {
+    font-size: 0.9rem;
+    color: #3498db;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.section-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.zone-main {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+}
+
+.status-bar {
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-bar button {
+    padding: 8px 20px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.console-sidebar {
+    width: 280px;
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-box {
+    flex: 1;
+    background: #121212;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 8px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bottom-actions-container {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.new-game-btn, .exit-game-btn {
+    padding: 6px 12px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.exit-game-btn {
+    background: #c0392b;
+}
+
+/* ==========================================
+ *  4. HUD, VITA, MANA E ZONE DI GIOCO
+ *  ========================================== */
+.player-hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    background: #151515;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #2a2a2a;
+}
+
+.life-counter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.life-counter button, .mana-item button {
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.life-counter button {
+    width: 24px;
+    height: 24px;
+}
+
+.life-counter button:hover {
+    background: #f39c12;
+    color: #121212;
+}
+
+.mana-pool {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.mana-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    border: 1px solid rgba(0,0,0,0.3);
+}
+
+.mana-w { background-color: #f1c40f; color: #000; }
+.mana-u { background-color: #3498db; color: #fff; }
+.mana-b { background-color: #2c3e50; color: #fff; }
+.mana-r { background-color: #e74c3c; color: #fff; }
+.mana-g { background-color: #2ecc71; color: #000; }
+.mana-c { background-color: #bdc3c7; color: #000; }
+
+.mana-item button {
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    padding: 0 3px;
+}
+
+.mana-item button:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* ==========================================
+ *  5. GESTIONE MANA, MANO E CAMPO BATTAGLIA
+ *  ========================================== */
+.player-hand-wrapper {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.player-hand-container {
+    flex: 1;
+    position: relative;
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.hand-cards-flex {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px;
+    align-items: center;
+    min-height: 140px;
+}
+
+.zone {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed #444;
+    border-radius: 6px;
+    min-height: 140px;
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    align-items: center;
+    overflow-x: auto;
+}
+
+.card-item-img {
+    flex: 0 0 auto;
+    width: 95px;
+    height: 135px;
+    background: #1a1a1a;
+    border: 2px solid #444;
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.2s ease, border-color 0.2s;
+}
+
+.card-item-img:hover {
+    transform: translateY(-10px);
+    border-color: #f39c12;
+    z-index: 10;
+}
+
+.card-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-selectable.selected {
+    border-color: #f39c12 !important;
+    box-shadow: 0 0 12px #f39c12;
+    transform: translateY(-8px);
+}
+
+/* Zone di Servizio a destra della mano */
+.right-service-zones {
+    display: flex;
+    gap: 10px;
+    background: #161616;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.service-zone-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.zone-label-mini {
+    font-size: 11px;
+    color: #aaa;
+}
+
+.card-zone-shape {
+    width: 55px;
+    height: 78px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    cursor: pointer;
+    user-select: none;
+}
+
+.deck-card-back {
+    background: linear-gradient(135deg, #1b263b, #0d1b2a);
+    border: 2px solid #415a77;
+    color: #fff;
+}
+
+.graveyard-shape {
+    background: #222;
+    border: 2px dashed #555;
+    color: #ddd;
+}
+
+.exile-shape {
+    background: #1a1528;
+    border: 2px dashed #8e44ad;
+    color: #d2b4de;
+}
+
+/* ==========================================
+ *  6. SEZIONE AVVERSARIO & MANO COPERTA
+ *  ========================================== */
+.opp-hand-container {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.opp-hand-cards {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    flex: 1;
+    min-height: 70px;
+    align-items: center;
+}
+
+.card-back-shape {
+    width: 45px;
+    height: 63px;
+    background: linear-gradient(135deg, #1b263b, #0d1b2a);
+    border: 2px solid #415a77;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+
+/* ==========================================
+ *  7. MENU CONTESTUALE GLOBALE & AGGIORNAMENTI CSS
+ *  ========================================== */
+.context-menu {
+    position: fixed;
+    z-index: 100001;
+    background: #1e1e1e;
+    border: 2px solid #f39c12;
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+    padding: 4px 0;
+}
+
+.context-menu-item {
+    background: transparent;
+    border: none;
+    color: #e0e0e0;
+    padding: 8px 15px;
+    text-align: left;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: Arial, sans-serif;
+}
+
+.context-menu-item:hover {
+    background: #f39c12;
+    color: #121212;
+    font-weight: bold;
+}
+
+.phase-action-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    transition: background 0.2s;
+}
+
+.phase-action-btn:hover {
+    background-color: #219653;
+}
+
+/* Evidenziazione della fase attiva nella sidebar */
+.phase-box.active-phase {
+    background: #f39c12 !important;
+    color: #121212 !important;
+    font-weight: bold;
+    border-left: 5px solid #fff;
+    box-shadow: 0 0 10px rgba(243, 156, 18, 0.6);
+}
